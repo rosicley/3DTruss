@@ -1,0 +1,2 @@
+norm_2 -> norma de um vetor -> só funciona com bonded_vector.
+g++ Element.cpp Main.cpp Material.cpp Node.cpp Truss.cpp -llapack -o s
