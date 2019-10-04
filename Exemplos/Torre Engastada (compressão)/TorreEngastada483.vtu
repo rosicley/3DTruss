@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid">
+  <UnstructuredGrid>
+  <Piece NumberOfPoints="13"  NumberOfCells="23">
+    <Points>
+      <DataArray type="Float64" NumberOfComponents="3" format="ascii">
+0 0 0
+3.02761 0.184348 0
+0.25918 1.45247 0
+-2.67479 2.21713 0
+-5.62955 2.84778 0
+-8.58947 3.40417 0
+-9.66948 3.09668 0
+-8.77412 2.42338 0
+-5.83017 1.86939 0
+-2.91131 1.24726 0
+-0.0358853 0.501374 0
+2.93871 1.17722 0
+0 1 0
+      </DataArray>
+    </Points>
+    <Cells>
+      <DataArray type="Int32" Name="connectivity" format="ascii">
+0 1
+1 2
+2 3
+3 4
+4 5
+5 6
+0 12
+0 11
+1 11
+1 10
+2 10
+2 9
+3 9
+3 8
+4 8
+4 7
+5 7
+7 6
+11 12
+11 10
+10 9
+8 9
+7 8
+      </DataArray>
+      <DataArray type="Int32" Name="offsets" format="ascii">
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+22
+24
+26
+28
+30
+32
+34
+36
+38
+40
+42
+44
+46
+      </DataArray>
+      <DataArray type="UInt8" Name="types" format="ascii">
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+      </DataArray>
+    </Cells>
+    <PointData>
+      <DataArray type="Float64" NumberOfComponents="3" Name="Displacement" format="ascii">
+0 0 0
+0.0276132 0.184348 0
+-5.74082 1.45247 0
+-11.6748 2.21713 0
+-17.6296 2.84778 0
+-23.5895 3.40417 0
+-25.6695 2.59668 0
+-23.7741 1.42338 0
+-17.8302 0.869393 0
+-11.9113 0.247263 0
+-6.03589 -0.498626 0
+-0.0612863 0.177215 0
+0 0 0
+      </DataArray> 
+    </PointData>
+    <CellData>
+    </CellData>
+  </Piece>
+  </UnstructuredGrid>
+</VTKFile>

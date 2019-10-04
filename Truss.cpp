@@ -141,6 +141,10 @@ matrix<double> Truss::Hessian()
 int Truss::solveProblem()
 {
     double normInitialCoordinate=0.0;
+
+    // std::stringstream text;
+	// text << name_ << "-forçaXdeslocamento.txt";
+	// std::ofstream file(text.str());
     
     for(int i=0; i<nodes_.size(); i++)
     {
@@ -152,7 +156,7 @@ int Truss::solveProblem()
     {
 
         std::cout << "------------------------- LOAD STEP = "
-                 << loadStep << " -------------------------\n";
+                  << loadStep << " -------------------------\n";
 
         vector<double> dexternalForces = (loadStep)*ExternalForces()/numberOfSteps_;
 
@@ -203,7 +207,7 @@ int Truss::solveProblem()
         
     exportToParaview(loadStep);
 
-    //std::cout << nodes_[6]->getCurrentCoordinate()[1]-nodes_[6]->getInitialCoordinate()[1] << " " << dexternalForces[18] << std::endl;
+    //file << nodes_[6]->getCurrentCoordinate()[1]-nodes_[6]->getInitialCoordinate()[1] << " " << dexternalForces[18] << std::endl;
 
     }
 }
@@ -277,14 +281,14 @@ void Truss::exportToParaview(const int& loadstep)
 		 << "    </Cells>" << "\n";
 	//nodal results
 	file << "    <PointData>" <<"\n";
-	file << "      <DataArray type=\"Float64\" NumberOfComponents=\"2\" "
+	file << "      <DataArray type=\"Float64\" NumberOfComponents=\"3\" "
 		<< "Name=\"Displacement\" format=\"ascii\">" << "\n";
 
 	for (Node* n: nodes_)
 	{
 		file << n->getCurrentCoordinate()[0] - n->getInitialCoordinate()[0] << " "
-             << n->getCurrentCoordinate()[1] - n->getInitialCoordinate()[1] << "\n";
-			//<< n->getCurrentCoordinate()[2] - n->getInitialCoordinate()[2] << ;
+             << n->getCurrentCoordinate()[1] - n->getInitialCoordinate()[1] << " "
+			 << n->getCurrentCoordinate()[2] - n->getInitialCoordinate()[2] << "\n";
 	}
 	
     // file << "      </DataArray> " << "\n";

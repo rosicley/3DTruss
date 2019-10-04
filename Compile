@@ -1,0 +1,1 @@
+g++ Element.cpp Main.cpp Material.cpp Node.cpp Truss.cpp -o s -llapack

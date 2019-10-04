@@ -1,0 +1,28 @@
+MisesTrussExample
+Number of Materials, Nodes, Elements, Loaded Nodes, Nodes with Boundary, Steps, Tolarence
+1 3 2 1 3 500 0.000000001
+
+Materials
+Number, Young
+0 1000.0
+
+Nodes
+Number, X1, X2, X3
+0 0.0 0.0 0.0
+1 2.0 0.0 0.0
+2 1.0 1.0 0.0
+
+Elements
+Number, Initial Node, End Node, Type Materials, Area
+0 0 2 0 1.0
+1 2 1 0 1.0
+
+Loaded Nodes
+Number, X1, X2, X3
+2 0.0 -1350.0 0.0
+
+Nodes with Boundary Conditions (1 para restrito e 0 para livre)
+Number, X1, X2, X3
+0 1 1 1
+1 1 1 1
+2 0 0 1
