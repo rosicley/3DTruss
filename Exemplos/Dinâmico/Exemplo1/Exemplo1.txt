@@ -1,4 +1,4 @@
-MisesTrussExample
+Exemplo1Dinâmica
 Number of Materials, Nodes, Elements, Loaded Nodes, Nodes with Boundary, Steps, DeltaT, Tolarence
 1 11 10 1 11 500 0.0002 0.000000001
 

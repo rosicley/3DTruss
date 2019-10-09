@@ -414,7 +414,6 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
             if (sqrt(normDeltaY / normInitialCoordinate) <= tolerance)
                 break;
         }
-        std::cout << "teste" << std::endl;
         exportToParaview(timeStep);
 
         for (Node *node : nodes_)
