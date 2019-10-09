@@ -1,17 +1,17 @@
 #include "Material.h"
 
-Material::Material(){}
+Material::Material() {}
 
-Material::Material(const int& index, 
-                   const double& young)                   
+Material::Material(const int &index,
+                   const double &young,
+                   const double &density)
 {
-    index_=index;
-    young_=young;
-    
+    index_ = index;
+    young_ = young;
+    density_ = density;
 }
 
-Material::~Material(){}
-
+Material::~Material() {}
 
 int Material::getIndex()
 {
@@ -23,14 +23,18 @@ double Material::getYoung()
     return young_;
 }
 
-
-void Material::setIndex(const int& index)
+double Material::getDensity()
 {
-    index_=index;
+    return density_;
 }
 
-void Material::setYoung(const double& young)
-{
-    young_=young;
-}
 
+// void Material::setIndex(const int& index)
+// {
+//     index_=index;
+// }
+
+// void Material::setYoung(const double& young)
+// {
+//     young_=young;
+// }

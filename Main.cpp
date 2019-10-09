@@ -8,7 +8,7 @@ int main()
 
 Truss* Ex = new Truss;
 
-Ex->readInput("TorreEngastada.txt");
+Ex->readInput("MisesTruss.txt","Dynamic"); //Static or Dynamic
 
 return 0;
 }

@@ -1,33 +1,30 @@
 #pragma once
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 #include "Node.h"
 #include "Material.h"
-#include<math.h>
+#include <math.h>
 #include <boost/numeric/ublas/matrix.hpp>
 
-
 using namespace boost::numeric::ublas;
-
 
 class Element
 {
 public:
     Element();
 
-    Element(const int& index, 
-            const std::vector<Node*>& connection, 
-            Material* material, 
-            const double& area); 
-    
+    Element(const int &index,
+            const std::vector<Node *> &connection,
+            Material *material,
+            const double &area);
+
     ~Element();
-    
-    
+
     int getIndex();
 
-    std::vector<Node*> getConnection();
+    std::vector<Node *> getConnection();
 
-    Material* getMaterial();
+    Material *getMaterial();
 
     double getArea();
 
@@ -37,26 +34,26 @@ public:
 
     double PiolaStress();
 
-    std::vector<double> ForceConec();
+    std::vector<double> InternalForce();
 
     bounded_matrix<double, 6, 6> localHessian();
 
+    bounded_matrix<double, 6, 6> localMassMatrix();
 
-    void setIndex(const int& index);
+    void setIndex(const int &index);
 
-    void setConnection(const std::vector<Node*>& connection);
+    void setConnection(const std::vector<Node *> &connection);
 
-    void setMaterial(Material* material);
+    void setMaterial(Material *material);
 
-    void setArea(const double& area);
-   
+    void setArea(const double &area);
 
 private:
     int index_;
 
-    std::vector<Node*> connection_;
+    std::vector<Node *> connection_;
 
-    Material* material_;
-    
-    double area_;  
+    Material *material_;
+
+    double area_;
 };

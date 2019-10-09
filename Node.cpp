@@ -1,17 +1,33 @@
 #include "Node.h"
 
-Node::Node(){}
+Node::Node() {}
 
-Node::Node(const int& index,
-           const std::vector<double>& initialCoordinate)
+Node::Node(const int &index,
+           const std::vector<double> &initialCoordinate)
 {
-    index_=index;
-    initialCoordinate_=initialCoordinate;
-    currentCoordinate_=initialCoordinate;
+    index_ = index;
+    initialCoordinate_ = initialCoordinate;
+    pastCoordinate_ = initialCoordinate;
+    currentCoordinate_ = initialCoordinate;
+    pastVelocity_.reserve(3);
+    pastAcceleration_.reserve(3);
+    currentVelocity_.reserve(3);
+    currentAcceleration_.reserve(3);
+    pastVelocity_ = {0.0, 0.0, 0.0};
+    pastAcceleration_ = {0.0, 0.0, 0.0};
+    currentVelocity_ = {0.0, 0.0, 0.0};
+    currentAcceleration_ = {0.0, 0.0, 0.0};
+
+    // for (size_t i = 0; i < 3; i++)
+    // {           
+    //     pastVelocity_[i] = 0.0;
+    //     pastAcceleration_[i] = 0.0;
+    //     currentVelocity_[i] = 0.0;
+    //     currentAcceleration_[i] = 0.0;
+    // }
 }
 
-Node::~Node(){}
-
+Node::~Node() {}
 
 int Node::getIndex()
 {
@@ -23,33 +39,62 @@ std::vector<double> Node::getInitialCoordinate()
     return initialCoordinate_;
 }
 
+std::vector<double> Node::getPastCoordinate()
+{
+    return pastCoordinate_;
+}
+
+std::vector<double> Node::getPastVelocity()
+{
+    return pastVelocity_;
+}
+
+std::vector<double> Node::getPastAcceleration()
+{
+    return pastAcceleration_;
+}
+
 std::vector<double> Node::getCurrentCoordinate()
 {
     return currentCoordinate_;
 }
 
-// std::vector<double> Node::InternalForce()
-// {
-//     return internalForce_;
-// }
-
-// std::vector<double> Node::ExternalForce()
-// {
-//     return externalForce_;
-// }
-
-
-void Node::setIndex(const int& index)
+std::vector<double> Node::getCurrentVelocity()
 {
-    index_=index;
+    return currentVelocity_;
 }
 
-void Node::setInitialCoordinate(const std::vector<double>& initialCoordinate)
+std::vector<double> Node::getCurrentAcceleration()
 {
-    initialCoordinate_=initialCoordinate;
+    return currentAcceleration_;
 }
 
-void Node::setCurrentCoordinate(const std::vector<double>& currentCoordinate)
+void Node::setPastCoordinate(const std::vector<double> &pastCoordinate)
 {
-    currentCoordinate_=currentCoordinate;
+    pastCoordinate_ = pastCoordinate;
+}
+
+void Node::setPastVelocity(const std::vector<double> &pastVelocity)
+{
+    pastVelocity_ = pastVelocity;
+}
+
+void Node::setPastAcceleration(const std::vector<double> &pastAcceleration)
+{
+    pastAcceleration_ = pastAcceleration;
+}
+
+void Node::setCurrentCoordinate(const std::vector<double> &currentCoordinate)
+{
+    currentCoordinate_ = currentCoordinate;
+}
+
+void Node::setCurrentVelocity(const std::vector<double> &currentVelocity)
+{
+    currentVelocity_ = currentVelocity;
+}
+
+void Node::setCurrentAcceleration(const std::vector<double> &currentAcceleration)
+{
+    currentAcceleration_ = currentAcceleration;
 }

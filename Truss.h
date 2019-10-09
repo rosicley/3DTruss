@@ -1,8 +1,8 @@
 #pragma once
-#include<iostream>
-#include<vector>
-#include<fstream>
-#include<string>
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
 #include "Node.h"
 #include "Element.h"
 #include "Material.h"
@@ -10,64 +10,69 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>       
-#include <boost/numeric/bindings/ublas/vector.hpp> 
-
-
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
 
 using namespace boost::numeric::ublas;
 
 class Truss
 {
 public:
-std::vector<Node*> getNodes();
+    std::vector<Node *> getNodes();
 
-std::vector<Element*> getElements();
+    std::vector<Element *> getElements();
 
-std::vector<Material*> getMaterial();
+    std::vector<Material *> getMaterial();
 
-vector<double> InternalForces();
+    vector<double> InternalForces();
 
-vector<double> ExternalForces();
+    vector<double> InertialForces(const double &beta, const double &gamma, const double &deltat);
 
-vector<int> BoundaryCondition();
+    vector<double> ExternalForces();
 
-matrix<double> Hessian();
+    vector<int> BoundaryCondition();
 
-int solveProblem();
+    matrix<double> Hessian();
 
-void exportToParaview(const int& loadstep);
+    matrix<double> MassMatrix();
 
-void DisplacementVesursLoad(const double& force);
+    int solveStaticProblem(const int &numberOfSteps, const double &tolerance);
 
-void addNode(const int& index, const std::vector<double>& initialCoordinate);
+    int solveDynamicProblem(const int &numberOfTimes, const double &deltat, const double &tolerance);
 
-void addElement(const int& index, 
-                const std::vector<int>& connection, 
-                const int& material, 
-                const double& area);
+    void exportToParaview(const int &loadstep);
 
-void addMaterial(const int& index, 
-                 const double& young);
+    void DisplacementVesursLoad(const double &force);
 
-void readInput(const std::string& read);
+    void addNode(const int &index,
+                 const std::vector<double> &initialCoordinate);
+
+    void addElement(const int &index,
+                    const std::vector<int> &connection,
+                    const int &material,
+                    const double &area);
+
+    void addMaterial(const int &index,
+                     const double &young,
+                     const double &density);
+
+    void readInput(const std::string &read,
+                   const std::string &typeAnalyze);
 
 private:
-std::vector<Node*> nodes_;
+    std::vector<Node *> nodes_;
 
-std::vector<Element*> elements_;
+    std::vector<Element *> elements_;
 
-std::vector<Material*> materials_;
+    std::vector<Material *> materials_;
 
-std::vector<int> boundaryConditions_;
+    std::vector<int> boundaryConditions_;
 
-std::vector<double> externalForces_;
+    std::vector<double> externalForces_;
 
-int numberOfSteps_;
+    // int numberOfSteps_;
 
-double tolerance_;
+    // double tolerance_;
 
-std::string name_;
-
-
+    std::string name_;
 };
