@@ -10,7 +10,7 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-#include <boost/numeric/bindings/lapack/driver/geev.hpp>
+#include <boost/numeric/bindings/lapack/driver/ggev.hpp>
 #include <boost/numeric/bindings/lapack/computational/getrf.hpp>
 #include <boost/numeric/bindings/lapack/computational/getri.hpp>
 #include <boost/numeric/bindings/ublas/matrix.hpp>

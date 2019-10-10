@@ -114,7 +114,7 @@ vector<double> Truss::InertialForces(const double &beta, const double &gamma, co
 
     massMatrix = MassMatrix();
 
-    amortecimento = massMatrix;
+    amortecimento = 0.0 * massMatrix;
 
     for (Node *node : nodes_)
     {
@@ -276,69 +276,91 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     double beta = 0.25, gamma = 0.5;
     double time = 0.0;
 
-    matrix<double, column_major> J(3 * nodes_.size(), 3 * nodes_.size());
-    vector<int> ipiv(3 * nodes_.size());
-    J = MassMatrix();
-    boost::numeric::bindings::lapack::getrf(J, ipiv);
-    boost::numeric::bindings::lapack::getri(J, ipiv, boost::numeric::bindings::lapack::optimal_workspace());
-    J = prod(J, Hessian());
+    matrix<double, column_major> hessian0(3 * nodes_.size(), 3 * nodes_.size());
+    hessian0 = Hessian();
+    matrix<double, column_major> mass(3 * nodes_.size(), 3 * nodes_.size());
+    mass = MassMatrix();
+
     for (int i = 0; i < 3 * nodes_.size(); i++)
     {
         if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
         {
             for (int k = 0; k < 3 * nodes_.size(); k++)
             {
-                J(i, k) = 0.0;
-                J(k, i) = 0.0;
+                hessian0(i, k) = 0.0;
+                hessian0(k, i) = 0.0;
+                mass(i, k) = 0.0;
+                mass(k, i) = 0.0;
             }
-            J(i, i) = 1.0;
+            hessian0(i, i) = 1.0;
+            mass(i, i) = 1.0;
         }
     }
 
-    vector<std::complex<double>> eigenvalues(3 * nodes_.size(), 0.0);
-    matrix<std::complex<double>, column_major> vl(3 * nodes_.size(),3 * nodes_.size());
-    matrix<std::complex<double>, column_major> vr(3 * nodes_.size(),3 * nodes_.size());
-    
+    vector<double> alphar(3 * nodes_.size()), alphai(3 * nodes_.size()), betinha(3 * nodes_.size());
+    matrix<double, column_major> vl(1, 3 * nodes_.size());
+    matrix<double, column_major> vr(1, 3 * nodes_.size());
+    double work[10 * (3 * nodes_.size())];
 
-    boost::numeric::bindings::lapack::optimal_workspace work;
+    boost::numeric::bindings::lapack::ggev('N', 'N', hessian0, mass, alphar, alphai, betinha, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
 
-    //boost::numeric::bindings::lapack::geev(J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
-    // boost::numeric::bindings::lapack::geev(J, eigenvalues, &vl, &vr, work);
-    boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
+    vector<double> eigenvalues(3 * nodes_.size());
+    for (int i = 0; i < 3 * nodes_.size(); i++)
+    {
+        eigenvalues(i) = alphar(i) / betinha(i);
+    }
+
+    for (int i = 0; i < 3 * nodes_.size(); i++)
+    {
+        eigenvalues(i) = sqrt(eigenvalues(i));
+    }
 
     int auxiliar = int(3 * nodes_.size() / 20) + 2;
     vector<double> vecAuxiliar(auxiliar, 1000.0);
     vecAuxiliar(0) = -1000.0;
 
+    for (int i = 0; i < (auxiliar - 1); i++)
+    {
+        for (int j = 0; j < 3 * nodes_.size(); j++)
+        {
+            if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
+            {
+                vecAuxiliar(i + 1) = eigenvalues(j);
+            }
+        }
+    }
+
     std::stringstream text2;
-    text2 << name_ << "-modosdevibracao.txt";
+    text2 << name_ << "-ModosDeVibracao.txt";
     std::ofstream file2(text2.str());
 
-    // for (int i = 0; i < 3 * nodes_.size(); i++)
-    // {
-    //     file2 << eigenvalues(i) << std::endl;
-    // }
+    for (int i = 0; i < (vecAuxiliar.size() - 1); i++)
+    {
+        file2 << "w" << i << " = " << vecAuxiliar(i + 1) << " rad/(ms)" << std::endl;
+    }
 
-    // for (int i = 0; i < (auxiliar - 1); i++)
-    // {
-    //     for (int j = 0; j < 3 * nodes_.size(); j++)
-    //     {
-    //         if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
-    //         {
-    //             vecAuxiliar(i + 1) = eigenvalues(j);
-    //         }
-    //     }
-    // }
-
-    double deltat = 2 * 3.1415926535 / (10 * vecAuxiliar(auxiliar)); //ntp=10
-
-    file2 << "deltat = " << deltat << std::endl;
+    const double deltat = 2.0 * 3.1415926535 / (10.0 * vecAuxiliar(auxiliar - 1)); //ntp=10
+    file2 << std::endl;
+    file2 << "deltat = " << deltat << " ms" << std::endl;
 
     vector<int> c(3 * nodes_.size(), 0);
     matrix<double, column_major> massMatrix = MassMatrix();
     vector<double> initialAcceleration(3 * nodes_.size(), 0.0);
-
     initialAcceleration = ExternalForces();
+
+    for (int i = 0; i < 3 * nodes_.size(); i++)
+    {
+        if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+        {
+            for (int k = 0; k < 3 * nodes_.size(); k++)
+            {
+                massMatrix(i, k) = 0.0;
+                massMatrix(k, i) = 0.0;
+            }
+            massMatrix(i, i) = 1.0;
+            initialAcceleration(i) = 0.0;
+        }
+    }
 
     boost::numeric::bindings::lapack::gesv(massMatrix, c, initialAcceleration);
 
@@ -350,7 +372,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     }
 
     std::stringstream text1;
-    text1 << name_ << "-deslocamentoxtempo.txt";
+    text1 << name_ << "-DeslocamentoxTempo.txt";
     std::ofstream file1(text1.str());
 
     double normInitialCoordinate = 0.0;
@@ -376,7 +398,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
             g = InternalForces() + InertialForces(beta, gamma, deltat) - dexternalForces;
 
-            matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + MassMatrix() * gamma / (beta * deltat);
+            matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + 0.0 * MassMatrix() * gamma / (beta * deltat);
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
             {
@@ -397,40 +419,6 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             boost::numeric::bindings::lapack::gesv(hessian, c, deltaY);
 
             double normDeltaY = 0.0;
-
-            // for (Node *node : nodes_) //loop para atualizar as coordenadas dos nós
-            // {
-            //     int index = node->getIndex();
-            //     std::vector<double> currentCoordinate = node->getCurrentCoordinate();
-
-            //     normDeltaY += deltaY[3 * index] * deltaY[3 * index] + deltaY[3 * index + 1] * deltaY[3 * index + 1] + deltaY[3 * index + 2] * deltaY[3 * index + 2];
-
-            //     currentCoordinate[0] += deltaY[3 * index];
-            //     currentCoordinate[1] += deltaY[3 * index + 1];
-            //     currentCoordinate[2] += deltaY[3 * index + 2];
-            //     node->setCurrentCoordinate(currentCoordinate);
-
-            //     std::vector<double> accel;
-            //     accel.reserve(3);
-
-            //     for (int i = 0; i < 3; i++)
-            //     {
-            //         accel[i] = (node->getCurrentCoordinate()[i]) / (beta * deltat * deltat) - (node->getPastCoordinate()[i]) / (beta * deltat * deltat) -
-            //                    (node->getPastVelocity()[i]) / (beta * deltat) - (node->getPastAcceleration()[i]) * (0.5 / beta - 1.0);
-            //     }
-            //     node->setCurrentAcceleration(accel);
-
-            //     std::vector<double> vel;
-            //     vel.reserve(3);
-
-            //     for (int i = 0; i < 3; i++)
-            //     {
-            //         vel[i] = (node->getCurrentAcceleration()[i]) * gamma * deltat + (node->getPastVelocity()[i]) * 1.0 +
-            //                  (node->getPastAcceleration()[i]) * deltat * (1.0 - gamma);
-            //     }
-            //     node->setCurrentVelocity(vel);
-            //     std::cout<<"tesstaaadndo"<<std::endl;
-            // }
 
             for (int h = 0; h < nodes_.size(); h++) //loop para atualizar as coordenadas dos nós
             {
@@ -484,7 +472,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             node->setPastAcceleration(updatingAccel);
         }
 
-        file1 << nodes_[10]->getCurrentCoordinate()[0] - nodes_[10]->getInitialCoordinate()[0] << " " << time << std::endl;
+        file1 << nodes_[20]->getCurrentCoordinate()[1] - nodes_[20]->getInitialCoordinate()[1] << " " << time << std::endl;
     }
 }
 

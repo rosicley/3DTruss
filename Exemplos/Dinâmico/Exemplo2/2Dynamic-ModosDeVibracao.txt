@@ -1,0 +1,9 @@
+w0 = 0.0444502 rad/(ms)
+w1 = 0.26427 rad/(ms)
+w2 = 0.686721 rad/(ms)
+w3 = 0.814177 rad/(ms)
+w4 = 1 rad/(ms)
+w5 = 1.24064 rad/(ms)
+w6 = 1.86042 rad/(ms)
+
+deltat = 0.337729 ms

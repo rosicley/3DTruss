@@ -17,14 +17,6 @@ Node::Node(const int &index,
     pastAcceleration_ = {0.0, 0.0, 0.0};
     currentVelocity_ = {0.0, 0.0, 0.0};
     currentAcceleration_ = {0.0, 0.0, 0.0};
-
-    // for (size_t i = 0; i < 3; i++)
-    // {           
-    //     pastVelocity_[i] = 0.0;
-    //     pastAcceleration_[i] = 0.0;
-    //     currentVelocity_[i] = 0.0;
-    //     currentAcceleration_[i] = 0.0;
-    // }
 }
 
 Node::~Node() {}
