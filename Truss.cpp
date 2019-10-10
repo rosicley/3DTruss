@@ -271,10 +271,67 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
     }
 }
 
-int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, const double &tolerance)
+int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance)
 {
     double beta = 0.25, gamma = 0.5;
-    double time=0.0;
+    double time = 0.0;
+
+    matrix<double, column_major> J(3 * nodes_.size(), 3 * nodes_.size());
+    vector<int> ipiv(3 * nodes_.size());
+    J = MassMatrix();
+    boost::numeric::bindings::lapack::getrf(J, ipiv);
+    boost::numeric::bindings::lapack::getri(J, ipiv, boost::numeric::bindings::lapack::optimal_workspace());
+    J = prod(J, Hessian());
+    for (int i = 0; i < 3 * nodes_.size(); i++)
+    {
+        if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+        {
+            for (int k = 0; k < 3 * nodes_.size(); k++)
+            {
+                J(i, k) = 0.0;
+                J(k, i) = 0.0;
+            }
+            J(i, i) = 1.0;
+        }
+    }
+
+    vector<double> eigenvalues(3 * nodes_.size(), 0.0);
+    matrix<double, column_major> vl(3 * nodes_.size(),3 * nodes_.size());
+    matrix<double, column_major> vr(3 * nodes_.size(),3 * nodes_.size());
+    
+
+    boost::numeric::bindings::lapack::optimal_workspace work;
+
+    boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr);
+    //boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
+
+    int auxiliar = int(3 * nodes_.size() / 20) + 2;
+    vector<double> vecAuxiliar(auxiliar, 1000.0);
+    vecAuxiliar(0) = -1000.0;
+
+    std::stringstream text2;
+    text2 << name_ << "-modosdevibracao.txt";
+    std::ofstream file2(text2.str());
+
+    for (int i = 0; i < 3 * nodes_.size(); i++)
+    {
+        file2 << eigenvalues(i) << std::endl;
+    }
+
+    for (int i = 0; i < (auxiliar - 1); i++)
+    {
+        for (int j = 0; j < 3 * nodes_.size(); j++)
+        {
+            if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
+            {
+                vecAuxiliar(i + 1) = eigenvalues(j);
+            }
+        }
+    }
+
+    double deltat = 2 * 3.1415926535 / (10 * vecAuxiliar(auxiliar)); //ntp=10
+
+    file2 << "deltat = " << deltat << std::endl;
 
     vector<int> c(3 * nodes_.size(), 0);
     matrix<double, column_major> massMatrix = MassMatrix();
@@ -291,9 +348,9 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
         node->setPastAcceleration({initialAcceleration(3 * index), initialAcceleration(3 * index + 1), initialAcceleration(3 * index + 2)});
     }
 
-    std::stringstream text;
-    text << name_ << "-deslocamentoxtempo.txt";
-    std::ofstream file(text.str());
+    std::stringstream text1;
+    text1 << name_ << "-deslocamentoxtempo.txt";
+    std::ofstream file1(text1.str());
 
     double normInitialCoordinate = 0.0;
     for (int i = 0; i < nodes_.size(); i++)
@@ -305,14 +362,14 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
     vector<double> dexternalForces = ExternalForces();
 
     for (int timeStep = 0; timeStep <= numberOfTimes; timeStep++)
-    {   
+    {
         time += deltat;
 
         std::cout << "------------------------- TIME STEP = "
                   << timeStep << " -------------------------\n";
 
         for (int interation = 0; interation < 20; interation++) //definir o máximo de interações por passo de carga
-        {   
+        {
             vector<int> c(3 * nodes_.size(), 0);
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
 
@@ -374,7 +431,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
             //     std::cout<<"tesstaaadndo"<<std::endl;
             // }
 
-            for (int h=0; h<nodes_.size();h++) //loop para atualizar as coordenadas dos nós
+            for (int h = 0; h < nodes_.size(); h++) //loop para atualizar as coordenadas dos nós
             {
                 int index = nodes_[h]->getIndex();
                 std::vector<double> currentCoordinate = nodes_[h]->getCurrentCoordinate();
@@ -394,7 +451,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
                     accel[i] = (nodes_[h]->getCurrentCoordinate()[i]) / (beta * deltat * deltat) - (nodes_[h]->getPastCoordinate()[i]) / (beta * deltat * deltat) -
                                (nodes_[h]->getPastVelocity()[i]) / (beta * deltat) - (nodes_[h]->getPastAcceleration()[i]) * (0.5 / beta - 1.0);
                 }
-                nodes_[h]->setCurrentAcceleration({accel[0],accel[1],accel[2]});             
+                nodes_[h]->setCurrentAcceleration({accel[0], accel[1], accel[2]});
 
                 std::vector<double> vel;
                 vel.reserve(3);
@@ -404,9 +461,9 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
                     vel[i] = (nodes_[h]->getCurrentAcceleration()[i]) * gamma * deltat + (nodes_[h]->getPastVelocity()[i]) * 1.0 +
                              (nodes_[h]->getPastAcceleration()[i]) * deltat * (1.0 - gamma);
                 }
-                nodes_[h]->setCurrentVelocity({vel[0],vel[1],vel[2]});
+                nodes_[h]->setCurrentVelocity({vel[0], vel[1], vel[2]});
             }
-            
+
             std::cout << "Iteration = " << interation
                       << "   x Norm = " << std::scientific << sqrt(normDeltaY / normInitialCoordinate)
                       << std::endl;
@@ -426,7 +483,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &deltat, c
             node->setPastAcceleration(updatingAccel);
         }
 
-        file << nodes_[10]->getCurrentCoordinate()[0]-nodes_[10]->getInitialCoordinate()[0] << " " << time << std::endl;
+        file1 << nodes_[10]->getCurrentCoordinate()[0] - nodes_[10]->getInitialCoordinate()[0] << " " << time << std::endl;
     }
 }
 
@@ -569,7 +626,7 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     int nmaterial, nnode, nelement, nforce, nboundary, numberOfTimesOrSteps_;
     double deltat_, tolerance_;
 
-    file >> nmaterial >> nnode >> nelement >> nforce >> nboundary >> numberOfTimesOrSteps_ >> deltat_ >> tolerance_;
+    file >> nmaterial >> nnode >> nelement >> nforce >> nboundary >> numberOfTimesOrSteps_ >> tolerance_;
 
     std::getline(file, line);
     std::getline(file, line);
@@ -673,6 +730,6 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
 
     if (typeAnalyze == "Dynamic")
     {
-        solveDynamicProblem(numberOfTimesOrSteps_, deltat_, tolerance_);
+        solveDynamicProblem(numberOfTimesOrSteps_, tolerance_);
     }
 }

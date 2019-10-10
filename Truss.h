@@ -15,6 +15,7 @@
 #include <boost/numeric/bindings/lapack/computational/getri.hpp>
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/lapack/workspace.hpp>
 
 using namespace boost::numeric::ublas;
 
@@ -41,7 +42,7 @@ public:
 
     int solveStaticProblem(const int &numberOfSteps, const double &tolerance);
 
-    int solveDynamicProblem(const int &numberOfTimes, const double &deltat, const double &tolerance);
+    int solveDynamicProblem(const int &numberOfTimes, const double &tolerance);
 
     void exportToParaview(const int &loadstep);
 
