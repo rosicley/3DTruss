@@ -295,15 +295,16 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
         }
     }
 
-    vector<double> eigenvalues(3 * nodes_.size(), 0.0);
-    matrix<double, column_major> vl(3 * nodes_.size(),3 * nodes_.size());
-    matrix<double, column_major> vr(3 * nodes_.size(),3 * nodes_.size());
+    vector<std::complex<double>> eigenvalues(3 * nodes_.size(), 0.0);
+    matrix<std::complex<double>, column_major> vl(3 * nodes_.size(),3 * nodes_.size());
+    matrix<std::complex<double>, column_major> vr(3 * nodes_.size(),3 * nodes_.size());
     
 
     boost::numeric::bindings::lapack::optimal_workspace work;
 
-    boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr);
-    //boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
+    //boost::numeric::bindings::lapack::geev(J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
+    // boost::numeric::bindings::lapack::geev(J, eigenvalues, &vl, &vr, work);
+    boost::numeric::bindings::lapack::geev('N', 'V', J, eigenvalues, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
 
     int auxiliar = int(3 * nodes_.size() / 20) + 2;
     vector<double> vecAuxiliar(auxiliar, 1000.0);
@@ -313,21 +314,21 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     text2 << name_ << "-modosdevibracao.txt";
     std::ofstream file2(text2.str());
 
-    for (int i = 0; i < 3 * nodes_.size(); i++)
-    {
-        file2 << eigenvalues(i) << std::endl;
-    }
+    // for (int i = 0; i < 3 * nodes_.size(); i++)
+    // {
+    //     file2 << eigenvalues(i) << std::endl;
+    // }
 
-    for (int i = 0; i < (auxiliar - 1); i++)
-    {
-        for (int j = 0; j < 3 * nodes_.size(); j++)
-        {
-            if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
-            {
-                vecAuxiliar(i + 1) = eigenvalues(j);
-            }
-        }
-    }
+    // for (int i = 0; i < (auxiliar - 1); i++)
+    // {
+    //     for (int j = 0; j < 3 * nodes_.size(); j++)
+    //     {
+    //         if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
+    //         {
+    //             vecAuxiliar(i + 1) = eigenvalues(j);
+    //         }
+    //     }
+    // }
 
     double deltat = 2 * 3.1415926535 / (10 * vecAuxiliar(auxiliar)); //ntp=10
 
