@@ -4,10 +4,14 @@ Material::Material() {}
 
 Material::Material(const int &index,
                    const double &young,
+                   const double &plastStrain,
+                   const double &hardeningModulus,
                    const double &density)
 {
     index_ = index;
     young_ = young;
+    plastStrain_=plastStrain;
+    hardeningModulus_=hardeningModulus;
     density_ = density;
 }
 
@@ -28,6 +32,15 @@ double Material::getDensity()
     return density_;
 }
 
+double Material::getPlastStrain()
+{
+    return plastStrain_;
+}
+
+double Material::getHardeningModulus()
+{
+    return hardeningModulus_;
+}
 
 // void Material::setIndex(const int& index)
 // {

@@ -58,6 +58,8 @@ public:
 
     void addMaterial(const int &index,
                      const double &young,
+                     const double &plastStrain,
+                     const double &hardeningModulus,
                      const double &density);
 
     void readInput(const std::string &read,

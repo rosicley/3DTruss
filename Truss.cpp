@@ -29,9 +29,11 @@ std::vector<Material *> Truss::getMaterial()
 
 void Truss::addMaterial(const int &index,
                         const double &young,
+                        const double &plastStrain,
+                        const double &hardeningModulus,
                         const double &density)
 {
-    Material *mat = new Material(index, young, density);
+    Material *mat = new Material(index, young, plastStrain, hardeningModulus, density);
     materials_.push_back(mat);
 }
 
@@ -198,9 +200,9 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 {
     double normInitialCoordinate = 0.0;
 
-    // std::stringstream text;
-    // text << name_ << "-forçaXdeslocamento.txt";
-    // std::ofstream file(text.str());
+    std::stringstream text;
+    text << name_ << "-forçaXdeslocamento.txt";
+    std::ofstream file(text.str());
 
     for (int i = 0; i < nodes_.size(); i++)
     {
@@ -267,7 +269,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         exportToParaview(loadStep);
 
-        //file << nodes_[6]->getCurrentCoordinate()[1]-nodes_[6]->getInitialCoordinate()[1] << " " << dexternalForces[18] << std::endl;
+        file << nodes_[3]->getCurrentCoordinate()[1] - nodes_[3]->getInitialCoordinate()[1] << " " << dexternalForces[10] << std::endl;
     }
 }
 
@@ -472,7 +474,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             node->setPastAcceleration(updatingAccel);
         }
 
-        file1 << nodes_[20]->getCurrentCoordinate()[1] - nodes_[20]->getInitialCoordinate()[1] << " " << time << std::endl;
+        file1 << nodes_[41]->getCurrentCoordinate()[1] - nodes_[41]->getInitialCoordinate()[1] << " " << time << " " << dexternalForces[124] << std::endl;
     }
 }
 
@@ -567,22 +569,26 @@ void Truss::exportToParaview(const int &loadstep)
              << n->getCurrentCoordinate()[2] - n->getInitialCoordinate()[2] << "\n";
     }
 
-    // file << "      </DataArray> " << "\n";
-    // file << "      <DataArray type=\"Float64\" NumberOfComponents=\"2\" "
-    // 	<< "Name=\"Velocity\" format=\"ascii\">" << "\n";
+    file << "      </DataArray> "
+         << "\n";
+    file << "      <DataArray type=\"Float64\" NumberOfComponents=\"3\" "
+         << "Name=\"Velocity\" format=\"ascii\">"
+         << "\n";
 
-    // for (Node* n: nodes_)
-    // {
-    // 	file << n->getCurrentVelocity()(0) << " " << n->getCurrentVelocity()(1) << "\n";
-    // }
-    // file << "      </DataArray> " << "\n";
-    // file << "      <DataArray type=\"Float64\" NumberOfComponents=\"2\" "
-    // 	<< "Name=\"Acceleration\" format=\"ascii\">" << "\n";
+    for (Node *n : nodes_)
+    {
+        file << n->getCurrentVelocity()[0] << " " << n->getCurrentVelocity()[1] << n->getCurrentVelocity()[2] << "\n";
+    }
+    file << "      </DataArray> "
+         << "\n";
+    file << "      <DataArray type=\"Float64\" NumberOfComponents=\"3\" "
+         << "Name=\"Acceleration\" format=\"ascii\">"
+         << "\n";
 
-    // for (Node* n: nodes_)
-    // {
-    // 	file << n->getCurrentAcceleration()(0) << " " << n->getCurrentAcceleration()(1) << "\n";
-    // }
+    for (Node *n : nodes_)
+    {
+        file << n->getCurrentAcceleration()[0] << " " << n->getCurrentAcceleration()[1] << n->getCurrentAcceleration()[2] << "\n";
+    }
     file << "      </DataArray> "
          << "\n";
     file << "    </PointData>"
@@ -625,11 +631,11 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     for (int i = 0; i < nmaterial; i++)
     {
         int index;
-        double young, density;
+        double young, plastStrain, hardeningModulus, density;
 
-        file >> index >> young >> density;
+        file >> index >> young >> plastStrain >> hardeningModulus >> density;
 
-        addMaterial(index, young, density);
+        addMaterial(index, young, plastStrain, hardeningModulus, density);
 
         std::getline(file, line);
     }

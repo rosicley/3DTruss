@@ -1,10 +1,10 @@
-2Dynamic
+ForçaSenoidal
 Number of Materials, Nodes, Elements, Loaded Nodes, Nodes with Boundary, Steps, Tolarence
-1 42 81 1 42 2000 0.000000001
+1 42 81 1 42 5000 0.000000001
 
 Materials
-Number, Young, Density
-0	200000000.0	7000000.0
+Number, Young, PlastStrain, Hardening, Density
+0	200000000.0 1000000000000000000000000.0 0.0 7000000.0
 
 Nodes
 Number, X1, X2, X3

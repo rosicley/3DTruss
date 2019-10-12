@@ -8,6 +8,8 @@ public:
 
     Material(const int &index,
              const double &young,
+             const double &plastStrain,
+             const double &hardeningModulus,
              const double &density);
 
     ~Material();
@@ -17,6 +19,10 @@ public:
     double getYoung();
 
     double getDensity();
+
+    double getPlastStrain();
+
+    double getHardeningModulus();
 
 
     // void setIndex(const int& index);
@@ -30,4 +36,8 @@ private:
     double young_;
 
     double density_;
+
+    double plastStrain_;
+
+    double hardeningModulus_;
 };

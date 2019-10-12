@@ -68,7 +68,17 @@ double Element::CurrentLength()
 double Element::PiolaStress()
 {
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
-    double s = green * (getMaterial()->getYoung());
+    double s;
+
+    if (green <= getMaterial()->getPlastStrain())
+    {
+        s = green * (getMaterial()->getYoung());
+    }
+
+    if (green > getMaterial()->getPlastStrain())
+    {
+        s = getMaterial()->getPlastStrain() * (getMaterial()->getYoung()) + (green - getMaterial()->getPlastStrain()) * getMaterial()->getHardeningModulus();
+    }
 
     return s;
 }
@@ -92,7 +102,19 @@ std::vector<double> Element::InternalForce()
 
 bounded_matrix<double, 6, 6> Element::localHessian()
 {
-    double young = (getMaterial()->getYoung());
+    double young;
+    double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
+   
+    if (green <= getMaterial()->getPlastStrain())
+    {
+        young = getMaterial()->getYoung();
+    }
+
+    if (green > getMaterial()->getPlastStrain())
+    {
+        young = getMaterial()->getHardeningModulus();
+    }
+
     std::vector<double> initialNode = connection_[0]->getCurrentCoordinate();
     std::vector<double> endNode = connection_[1]->getCurrentCoordinate();
     bounded_matrix<double, 6, 6> hessian;
