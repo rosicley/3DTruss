@@ -218,7 +218,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         vector<double> dexternalForces = (loadStep)*ExternalForces() / numberOfSteps;
 
-        for (int interation = 0; interation < 10; interation++) //definir o máximo de interações por passo de carga
+        for (int interation = 0; interation < 150; interation++) //definir o máximo de interações por passo de carga
         {
             vector<int> c(3 * nodes_.size(), 0.0);
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
@@ -269,7 +269,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         exportToParaview(loadStep);
 
-        file << nodes_[3]->getCurrentCoordinate()[1] - nodes_[3]->getInitialCoordinate()[1] << " " << dexternalForces[10] << std::endl;
+        file << nodes_[9]->getCurrentCoordinate()[1] - nodes_[9]->getInitialCoordinate()[1] << " " << dexternalForces[28] << std::endl;
     }
 }
 
@@ -474,7 +474,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             node->setPastAcceleration(updatingAccel);
         }
 
-        file1 << nodes_[41]->getCurrentCoordinate()[1] - nodes_[41]->getInitialCoordinate()[1] << " " << time << " " << dexternalForces[124] << std::endl;
+        file1 << nodes_[9]->getCurrentCoordinate()[1] - nodes_[9]->getInitialCoordinate()[1] << " " << time << std::endl;
     }
 }
 
@@ -577,7 +577,7 @@ void Truss::exportToParaview(const int &loadstep)
 
     for (Node *n : nodes_)
     {
-        file << n->getCurrentVelocity()[0] << " " << n->getCurrentVelocity()[1] << n->getCurrentVelocity()[2] << "\n";
+        file << n->getCurrentVelocity()[0] << " " << n->getCurrentVelocity()[1] << " " << n->getCurrentVelocity()[2] << "\n";
     }
     file << "      </DataArray> "
          << "\n";
@@ -587,7 +587,7 @@ void Truss::exportToParaview(const int &loadstep)
 
     for (Node *n : nodes_)
     {
-        file << n->getCurrentAcceleration()[0] << " " << n->getCurrentAcceleration()[1] << n->getCurrentAcceleration()[2] << "\n";
+        file << n->getCurrentAcceleration()[0] << " " << n->getCurrentAcceleration()[1] << " " << n->getCurrentAcceleration()[2] << "\n";
     }
     file << "      </DataArray> "
          << "\n";
@@ -617,23 +617,29 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
 
     std::getline(file, line);
     std::getline(file, line);
+    std::getline(file, line);
+    std::getline(file, line);
 
-    int nmaterial, nnode, nelement, nforce, nboundary, numberOfTimesOrSteps_;
+    int nmaterial, nnode, nelement, nforce, ntemp, nboundary, numberOfTimesOrSteps_;
     double deltat_, tolerance_;
 
-    file >> nmaterial >> nnode >> nelement >> nforce >> nboundary >> numberOfTimesOrSteps_ >> tolerance_;
+    file >> numberOfTimesOrSteps_ >> tolerance_;
 
     std::getline(file, line);
     std::getline(file, line);
+    std::getline(file, line);
+
+    file >> nmaterial;
+
     std::getline(file, line);
     std::getline(file, line);
 
     for (int i = 0; i < nmaterial; i++)
     {
         int index;
-        double young, plastStrain, hardeningModulus, density;
+        double young, plastStrain, hardeningModulus, density, expansion;
 
-        file >> index >> young >> plastStrain >> hardeningModulus >> density;
+        file >> index >> young >> plastStrain >> hardeningModulus >> density >> expansion;
 
         addMaterial(index, young, plastStrain, hardeningModulus, density);
 
@@ -641,6 +647,10 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     }
 
     std::getline(file, line);
+    std::getline(file, line);
+
+    file >> nnode;
+
     std::getline(file, line);
     std::getline(file, line);
 
@@ -658,6 +668,10 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
 
     std::getline(file, line);
     std::getline(file, line);
+
+    file >> nelement;
+
+    std::getline(file, line);
     std::getline(file, line);
 
     for (int i = 0; i < nelement; i++)
@@ -673,6 +687,10 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     }
 
     std::getline(file, line);
+    std::getline(file, line);
+
+    file >> nforce;
+
     std::getline(file, line);
     std::getline(file, line);
 
@@ -701,6 +719,20 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     }
 
     std::getline(file, line);
+    std::getline(file, line);
+
+    file >> ntemp;
+
+    std::getline(file, line);
+    std::getline(file, line);
+
+    ///colocar looping para pegar as barras
+
+    std::getline(file, line);
+    std::getline(file, line);
+
+    file >> nboundary;
+
     std::getline(file, line);
     std::getline(file, line);
 
