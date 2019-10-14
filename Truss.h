@@ -30,6 +30,8 @@ public:
 
     vector<double> InternalForces();
 
+    vector<double> TemperatureForces(const int &numberOfSteps, const int &currentStep);
+
     vector<double> InertialForces(const double &beta, const double &gamma, const double &deltat);
 
     vector<double> ExternalForces();
@@ -37,6 +39,8 @@ public:
     vector<int> BoundaryCondition();
 
     matrix<double> Hessian();
+
+    matrix<double> TemperatureHessian(const int &numberOfSteps, const int &currentStep);
 
     matrix<double> MassMatrix();
 
@@ -60,7 +64,8 @@ public:
                      const double &young,
                      const double &plastStrain,
                      const double &hardeningModulus,
-                     const double &density);
+                     const double &density,
+                     const double &expansionCoef);
 
     void readInput(const std::string &read,
                    const std::string &typeAnalyze);

@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid">
+  <UnstructuredGrid>
+  <Piece NumberOfPoints="10"  NumberOfCells="17">
+    <Points>
+      <DataArray type="Float64" NumberOfComponents="3" format="ascii">
+0 0 0
+3.9991 -0.0124199 0
+8 -0.017486 0
+12.0009 -0.0124199 0
+16 0 0
+15.9958 2.99899 0
+11.9976 2.98724 0
+8 2.98251 0
+4.00239 2.98724 0
+0.00419007 2.99899 0
+      </DataArray>
+    </Points>
+    <Cells>
+      <DataArray type="Int32" Name="connectivity" format="ascii">
+0 1
+1 2
+2 3
+3 4
+4 5
+5 6
+6 7
+7 8
+8 9
+9 0
+8 1
+7 2
+6 3
+9 1
+8 2
+5 3
+6 2
+      </DataArray>
+      <DataArray type="Int32" Name="offsets" format="ascii">
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+22
+24
+26
+28
+30
+32
+34
+      </DataArray>
+      <DataArray type="UInt8" Name="types" format="ascii">
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+4
+      </DataArray>
+    </Cells>
+    <PointData>
+      <DataArray type="Float64" NumberOfComponents="3" Name="Displacement" format="ascii">
+0 0 0
+-0.00090014 -0.0124199 0
+0 -0.017486 0
+0.00090014 -0.0124199 0
+0 0 0
+-0.00419007 -0.00100794 0
+-0.002386 -0.012759 0
+0 -0.0174902 0
+0.002386 -0.012759 0
+0.00419007 -0.00100794 0
+      </DataArray> 
+      <DataArray type="Float64" NumberOfComponents="3" Name="Velocity" format="ascii">
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+      </DataArray> 
+      <DataArray type="Float64" NumberOfComponents="3" Name="Acceleration" format="ascii">
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+0 0 0
+      </DataArray> 
+    </PointData>
+    <CellData>
+    </CellData>
+  </Piece>
+  </UnstructuredGrid>
+</VTKFile>

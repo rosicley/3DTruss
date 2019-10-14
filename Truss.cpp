@@ -31,9 +31,10 @@ void Truss::addMaterial(const int &index,
                         const double &young,
                         const double &plastStrain,
                         const double &hardeningModulus,
-                        const double &density)
+                        const double &density,
+                        const double &expansionCoef)
 {
-    Material *mat = new Material(index, young, plastStrain, hardeningModulus, density);
+    Material *mat = new Material(index, young, plastStrain, hardeningModulus, density, expansionCoef);
     materials_.push_back(mat);
 }
 
@@ -78,6 +79,31 @@ vector<double> Truss::InternalForces()
         }
     }
     return internalForces_;
+}
+
+vector<double> Truss::TemperatureForces(const int &numberOfSteps, const int &currentStep)
+{
+    int cont = elements_.size();
+    vector<double> tempForces_(3 * nodes_.size(), 0.0);
+
+    for (int i = 0; i < cont; i++)
+    {
+        std::vector<double> force = elements_[i]->TemperatureForce(numberOfSteps, currentStep);
+
+        int indexInitialNode = elements_[i]->getConnection()[0]->getIndex();
+        int indexEndNode = elements_[i]->getConnection()[1]->getIndex();
+
+        for (int id = 0; id < 3; id++)
+        {
+            tempForces_[3 * indexInitialNode + id] += force[id];
+        }
+
+        for (int id = 0; id < 3; id++)
+        {
+            tempForces_[3 * indexEndNode + id] += force[3 + id];
+        }
+    }
+    return tempForces_;
 }
 
 matrix<double> Truss::MassMatrix()
@@ -196,6 +222,32 @@ matrix<double> Truss::Hessian()
     return hessian;
 }
 
+matrix<double> Truss::TemperatureHessian(const int &numberOfSteps, const int &currentStep)
+{
+    matrix<double> hessian(3 * nodes_.size(), 3 * nodes_.size(), 0.0);
+
+    for (int i = 0; i < elements_.size(); i++)
+    {
+        bounded_matrix<double, 6, 6> localHessian = elements_[i]->localTemperatureHessian(numberOfSteps, currentStep);
+        int indexInitialNode = elements_[i]->getConnection()[0]->getIndex();
+        int indexEndNode = elements_[i]->getConnection()[1]->getIndex();
+        for (int ij = 0; ij < 3; ij++)
+        {
+            for (int ik = 0; ik < 3; ik++)
+            {
+                hessian(indexInitialNode * 3 + ij, indexInitialNode * 3 + ik) += localHessian(ij, ik);
+
+                hessian(indexInitialNode * 3 + ij, indexEndNode * 3 + ik) += localHessian(ij, ik + 3);
+
+                hessian(indexEndNode * 3 + ik, indexInitialNode * 3 + ij) += localHessian(ij + 3, ik);
+
+                hessian(indexEndNode * 3 + ij, indexEndNode * 3 + ik) += localHessian(ij + 3, ik + 3);
+            }
+        }
+    }
+    return hessian;
+}
+
 int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 {
     double normInitialCoordinate = 0.0;
@@ -218,12 +270,12 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         vector<double> dexternalForces = (loadStep)*ExternalForces() / numberOfSteps;
 
-        for (int interation = 0; interation < 150; interation++) //definir o máximo de interações por passo de carga
+        for (int interation = 0; interation < 15; interation++) //definir o máximo de interações por passo de carga
         {
             vector<int> c(3 * nodes_.size(), 0.0);
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
-            g = InternalForces() - dexternalForces;
-            matrix<double, column_major> hessian = Hessian();
+            g = InternalForces() - TemperatureForces(numberOfSteps, loadStep) - dexternalForces;
+            matrix<double, column_major> hessian = Hessian() + TemperatureHessian(numberOfSteps, loadStep);
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
             {
@@ -269,7 +321,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         exportToParaview(loadStep);
 
-        file << nodes_[9]->getCurrentCoordinate()[1] - nodes_[9]->getInitialCoordinate()[1] << " " << dexternalForces[28] << std::endl;
+        file << nodes_[12]->getCurrentCoordinate()[1] - nodes_[12]->getInitialCoordinate()[1] << " " << 600.00*loadStep/numberOfSteps << std::endl;
     }
 }
 
@@ -399,7 +451,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
 
             g = InternalForces() + InertialForces(beta, gamma, deltat) - dexternalForces;
-
+            //amortemciento
             matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + 0.0 * MassMatrix() * gamma / (beta * deltat);
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
@@ -474,7 +526,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             node->setPastAcceleration(updatingAccel);
         }
 
-        file1 << nodes_[9]->getCurrentCoordinate()[1] - nodes_[9]->getInitialCoordinate()[1] << " " << time << std::endl;
+        file1 << nodes_[12]->getCurrentCoordinate()[1] - nodes_[12]->getInitialCoordinate()[1] << " " << time << std::endl;
     }
 }
 
@@ -641,7 +693,7 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
 
         file >> index >> young >> plastStrain >> hardeningModulus >> density >> expansion;
 
-        addMaterial(index, young, plastStrain, hardeningModulus, density);
+        addMaterial(index, young, plastStrain, hardeningModulus, density, expansion);
 
         std::getline(file, line);
     }
@@ -726,7 +778,18 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
     std::getline(file, line);
     std::getline(file, line);
 
-    ///colocar looping para pegar as barras
+    for (int i = 0; i < ntemp; i++)
+    {
+        int index;
+        double deltaTemp;
+
+        file >> index >> deltaTemp;
+
+        elements_[index]->setDeltaTemp(deltaTemp);
+
+        std::getline(file, line);
+    }
+
 
     std::getline(file, line);
     std::getline(file, line);
