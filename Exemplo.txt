@@ -1,0 +1,40 @@
+Torre
+
+Analysis Parameters
+Number of time or load step, tolerance
+500 0.000000001
+
+Materials
+1
+Number, Young, PlastStrain, Hardening, Density, Expansion coefficient - (para análises lineares basta colocar o termo PlastStrain muito alto - 10000000000000000000000.0)
+0 1000.0 1000000000000000.0012 30000000.0 7000000.0 0.000014
+
+Nodes
+3
+Number, X1, X2, X3
+0 0.0 0.0 0.0
+1 2.0 0.0 0.0
+2 1.0 1.0 0.0
+
+Elements
+2
+Number, Initial Node, End Node, Type Materials, Area
+0 0 2 0 1.0
+1 2 1 0 1.0
+
+Loaded Nodes, 
+1
+Number, X1, X2, X3
+2 0.0 -1350.0 0.0
+
+Elements with temperature variation
+0
+Number DeltaTemperature
+
+Nodes with Boundary (1 p/ deslocamento restringido)
+3
+Number, X1, X2, X3
+0 1 1 1
+1 1 1 1
+2 0 0 1
+

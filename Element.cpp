@@ -76,7 +76,10 @@ double Element::PiolaStress()
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
     double s;
 
-    if (green <= getMaterial()->getPlastStrain())
+    //s = (getMaterial()->getYoung())*(green/(2*green+1));
+    //s = (getMaterial()->getYoung())*(sqrt(2*green+1)-1);
+
+    if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain() * -1.0)
     {
         s = green * (getMaterial()->getYoung());
     }
@@ -84,6 +87,11 @@ double Element::PiolaStress()
     if (green > getMaterial()->getPlastStrain())
     {
         s = getMaterial()->getPlastStrain() * (getMaterial()->getYoung()) + (green - getMaterial()->getPlastStrain()) * getMaterial()->getHardeningModulus();
+    }
+
+    if (green < getMaterial()->getPlastStrain() * -1.0)
+    {
+        s = -(getMaterial()->getPlastStrain()) * (getMaterial()->getYoung()) + (green + getMaterial()->getPlastStrain()) * getMaterial()->getHardeningModulus();
     }
 
     return s;
@@ -111,18 +119,18 @@ std::vector<double> Element::TemperatureForce(const int &numberOfSteps, const in
     std::vector<double> initialNode = connection_[0]->getCurrentCoordinate();
     std::vector<double> endNode = connection_[1]->getCurrentCoordinate();
     std::vector<double> forceConec_;
-    double young;
-    double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
+    double young= getMaterial()->getYoung();
+    // double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
-    if (green <= getMaterial()->getPlastStrain())
-    {
-        young = getMaterial()->getYoung();
-    }
+    // if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
+    // {
+    //     young = getMaterial()->getYoung();
+    // }
 
-    if (green > getMaterial()->getPlastStrain())
-    {
-        young = getMaterial()->getHardeningModulus();
-    }
+    // if (green > getMaterial()->getPlastStrain() || green < getMaterial()->getPlastStrain()*-1.0)
+    // {
+    //     young = getMaterial()->getHardeningModulus();
+    // }
 
     double ftemp = getArea() * young * getMaterial()->getExpansionCoef() * (getDeltaTemp() * currentStep / numberOfSteps);
 
@@ -143,15 +151,31 @@ bounded_matrix<double, 6, 6> Element::localHessian()
     double young;
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
-    if (green <= getMaterial()->getPlastStrain())
+    //young = (getMaterial()->getYoung())/sqrt(2*green+1);
+
+    //young = (getMaterial()->getYoung())/pow(2*green+1,2);
+
+    //young = (getMaterial()->getYoung())*(1/())
+
+    if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
     {
         young = getMaterial()->getYoung();
     }
 
-    if (green > getMaterial()->getPlastStrain())
+    if (green > getMaterial()->getPlastStrain() || green < getMaterial()->getPlastStrain()*-1.0)
     {
         young = getMaterial()->getHardeningModulus();
     }
+
+    // if (green <= getMaterial()->getPlastStrain())
+    // {
+    //     young = getMaterial()->getYoung();
+    // }
+
+    // if (green > getMaterial()->getPlastStrain())
+    // {
+    //     young = getMaterial()->getHardeningModulus();
+    // }
 
     std::vector<double> initialNode = connection_[0]->getCurrentCoordinate();
     std::vector<double> endNode = connection_[1]->getCurrentCoordinate();
@@ -184,18 +208,18 @@ bounded_matrix<double, 6, 6> Element::localHessian()
 
 bounded_matrix<double, 6, 6> Element::localTemperatureHessian(const int &numberOfSteps, const int &currentStep)
 {
-    double young;
+    double young= getMaterial()->getYoung();
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
-    if (green <= getMaterial()->getPlastStrain())
-    {
-        young = getMaterial()->getYoung();
-    }
+    // if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
+    // {
+    //     young = getMaterial()->getYoung();
+    // }
 
-    if (green > getMaterial()->getPlastStrain())
-    {
-        young = getMaterial()->getHardeningModulus();
-    }
+    // if (green > getMaterial()->getPlastStrain() || green < getMaterial()->getPlastStrain()*-1.0)
+    // {
+    //     young = getMaterial()->getHardeningModulus();
+    // }
 
     double ftemp = young * (getMaterial()->getExpansionCoef()) * (getDeltaTemp() * currentStep / numberOfSteps);
 

@@ -142,7 +142,7 @@ vector<double> Truss::InertialForces(const double &beta, const double &gamma, co
 
     massMatrix = MassMatrix();
 
-    amortecimento = 0.0 * massMatrix;
+    amortecimento = 0.05 * massMatrix;
 
     for (Node *node : nodes_)
     {
@@ -262,6 +262,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
         normInitialCoordinate += initialCoordinate[0] * initialCoordinate[0] + initialCoordinate[1] * initialCoordinate[1] + initialCoordinate[2] * initialCoordinate[2];
     }
 
+    //vector<double> auxiliarg(3 * nodes_.size(), 0.0);
     for (int loadStep = 0; loadStep <= numberOfSteps; loadStep++)
     {
 
@@ -290,6 +291,13 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
                     g[i] = 0.0;
                 }
             }
+            // vector<int> ipiv(3 * nodes_.size());
+            // boost::numeric::bindings::lapack::getrf(hessian, ipiv);
+            // boost::numeric::bindings::lapack::getri(hessian, ipiv, boost::numeric::bindings::lapack::optimal_workspace());
+            // deltaY = g;
+            // deltaY[7]=-2.8/7000;
+            // g = -deltaY;
+            // boost::numeric::bindings::lapack::gesv(hessian, c, g);
 
             deltaY = -g;
 
@@ -311,6 +319,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
                 nodes_[ih]->setCurrentCoordinate(currentCoordinate);
             }
 
+            //auxiliarg=InternalForces()-g;
             std::cout << "Iteration = " << interation
                       << "   x Norm = " << std::scientific << sqrt(normDeltaY / normInitialCoordinate)
                       << std::endl;
@@ -321,7 +330,13 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         exportToParaview(loadStep);
 
-        file << nodes_[12]->getCurrentCoordinate()[1] - nodes_[12]->getInitialCoordinate()[1] << " " << 600.00*loadStep/numberOfSteps << std::endl;
+        // file //<< nodes_[0]->getCurrentCoordinate()[0] - nodes_[0]->getInitialCoordinate()[0] << " "
+        //      << (nodes_[2]->getCurrentCoordinate()[1] - nodes_[2]->getInitialCoordinate()[1])*(-1.0) << " "
+        //      << auxiliarg[7]*(-1.0) << std::endl;
+
+        file //<< nodes_[0]->getCurrentCoordinate()[0] - nodes_[0]->getInitialCoordinate()[0] << " "
+            << -1.0*(nodes_[2]->getCurrentCoordinate()[1] - nodes_[2]->getInitialCoordinate()[1]) << " "
+            << -1.0*dexternalForces[7] << std::endl;
     }
 }
 
@@ -353,10 +368,10 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
     vector<double> alphar(3 * nodes_.size()), alphai(3 * nodes_.size()), betinha(3 * nodes_.size());
     matrix<double, column_major> vl(1, 3 * nodes_.size());
-    matrix<double, column_major> vr(1, 3 * nodes_.size());
+    matrix<double, column_major> vr(3 * nodes_.size(), 3 * nodes_.size());
     double work[10 * (3 * nodes_.size())];
 
-    boost::numeric::bindings::lapack::ggev('N', 'N', hessian0, mass, alphar, alphai, betinha, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
+    boost::numeric::bindings::lapack::ggev('N', 'V', hessian0, mass, alphar, alphai, betinha, vl, vr, boost::numeric::bindings::lapack::optimal_workspace());
 
     vector<double> eigenvalues(3 * nodes_.size());
     for (int i = 0; i < 3 * nodes_.size(); i++)
@@ -372,6 +387,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     int auxiliar = int(3 * nodes_.size() / 20) + 2;
     vector<double> vecAuxiliar(auxiliar, 1000.0);
     vecAuxiliar(0) = -1000.0;
+    //matrix<double> defmodo(auxiliar - 1, 3 * nodes_.size());
 
     for (int i = 0; i < (auxiliar - 1); i++)
     {
@@ -380,6 +396,10 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             if (eigenvalues(j) < vecAuxiliar(i + 1) and eigenvalues(j) > vecAuxiliar(i))
             {
                 vecAuxiliar(i + 1) = eigenvalues(j);
+                // for (int h = 0; h < 3 * nodes_.size(); h++)
+                // {
+                //     defmodo(i, h) = vr(h, j);
+                // }
             }
         }
     }
@@ -387,6 +407,25 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     std::stringstream text2;
     text2 << name_ << "-ModosDeVibracao.txt";
     std::ofstream file2(text2.str());
+
+    // for (int i = 0; i < (auxiliar - 1); i++)
+    // {
+    //     for (Node *n : nodes_)
+    //     {
+    //         int index = n->getIndex();
+    //         std::vector<double> coord = n->getInitialCoordinate();
+    //         coord[0] = coord[0] + defmodo(i, 3 * index)/10;
+    //         coord[1] = coord[1] + defmodo(i, 3 * index + 1)/10;
+    //         coord[2] = coord[2] + defmodo(i, 3 * index + 2)/10;
+    //         n->setCurrentCoordinate(coord);
+    //     }
+    //     exportToParaview(i);
+    // }
+    // for (Node *n : nodes_)
+    // {
+    //     std::vector<double> coord = n->getInitialCoordinate();
+    //     n->setCurrentCoordinate(coord);
+    // }
 
     for (int i = 0; i < (vecAuxiliar.size() - 1); i++)
     {
@@ -452,7 +491,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
             g = InternalForces() + InertialForces(beta, gamma, deltat) - dexternalForces;
             //amortemciento
-            matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + 0.0 * MassMatrix() * gamma / (beta * deltat);
+            matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + 0.05 * MassMatrix() * gamma / (beta * deltat);
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
             {
@@ -526,7 +565,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
             node->setPastAcceleration(updatingAccel);
         }
 
-        file1 << nodes_[12]->getCurrentCoordinate()[1] - nodes_[12]->getInitialCoordinate()[1] << " " << time << std::endl;
+        file1 << nodes_[23]->getCurrentCoordinate()[0] - nodes_[23]->getInitialCoordinate()[0] << " " << time << std::endl;
     }
 }
 
@@ -789,7 +828,6 @@ void Truss::readInput(const std::string &read, const std::string &typeAnalyze)
 
         std::getline(file, line);
     }
-
 
     std::getline(file, line);
     std::getline(file, line);
