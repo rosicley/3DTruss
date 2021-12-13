@@ -335,8 +335,8 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
         //      << auxiliarg[7]*(-1.0) << std::endl;
 
         file //<< nodes_[0]->getCurrentCoordinate()[0] - nodes_[0]->getInitialCoordinate()[0] << " "
-            << -1.0*(nodes_[2]->getCurrentCoordinate()[1] - nodes_[2]->getInitialCoordinate()[1]) << " "
-            << -1.0*dexternalForces[7] << std::endl;
+            << nodes_[12]->getCurrentCoordinate()[2] - nodes_[12]->getInitialCoordinate()[2] << " "
+            << dexternalForces[38] << std::endl;
     }
 }
 
