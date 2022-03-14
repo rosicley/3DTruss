@@ -11,10 +11,10 @@ Material::Material(const int &index,
 {
     index_ = index;
     young_ = young;
-    plastStrain_=plastStrain;
-    hardeningModulus_=hardeningModulus;
+    plastStrain_ = plastStrain;
+    hardeningModulus_ = hardeningModulus;
     density_ = density;
-    expansionCoef_=expansionCoef;
+    expansionCoef_ = expansionCoef;
 }
 
 Material::~Material() {}

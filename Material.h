@@ -31,7 +31,6 @@ public:
 
     // void setYoung(const double& young);
 
-
 private:
     int index_;
 

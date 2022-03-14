@@ -262,7 +262,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
         normInitialCoordinate += initialCoordinate[0] * initialCoordinate[0] + initialCoordinate[1] * initialCoordinate[1] + initialCoordinate[2] * initialCoordinate[2];
     }
 
-    //vector<double> auxiliarg(3 * nodes_.size(), 0.0);
+    // vector<double> auxiliarg(3 * nodes_.size(), 0.0);
     for (int loadStep = 0; loadStep <= numberOfSteps; loadStep++)
     {
 
@@ -271,7 +271,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
         vector<double> dexternalForces = (loadStep)*ExternalForces() / numberOfSteps;
 
-        for (int interation = 0; interation < 15; interation++) //definir o máximo de interações por passo de carga
+        for (int interation = 0; interation < 15; interation++) // definir o máximo de interações por passo de carga
         {
             vector<int> c(3 * nodes_.size(), 0.0);
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
@@ -280,7 +280,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
             {
-                if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+                if (boundaryConditions_[i] == 1) // quando =1 é porque o deslocamento naquela direção está sendo
                 {
                     for (int k = 0; k < 3 * nodes_.size(); k++)
                     {
@@ -305,7 +305,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
 
             double normDeltaY = 0.0;
 
-            for (int ih = 0; ih < nodes_.size(); ih++) //loop para atualizar as coordenadas dos nós
+            for (int ih = 0; ih < nodes_.size(); ih++) // loop para atualizar as coordenadas dos nós
             {
                 int index = nodes_[ih]->getIndex();
                 std::vector<double> currentCoordinate = nodes_[ih]->getCurrentCoordinate();
@@ -319,7 +319,7 @@ int Truss::solveStaticProblem(const int &numberOfSteps, const double &tolerance)
                 nodes_[ih]->setCurrentCoordinate(currentCoordinate);
             }
 
-            //auxiliarg=InternalForces()-g;
+            // auxiliarg=InternalForces()-g;
             std::cout << "Iteration = " << interation
                       << "   x Norm = " << std::scientific << sqrt(normDeltaY / normInitialCoordinate)
                       << std::endl;
@@ -352,7 +352,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
     for (int i = 0; i < 3 * nodes_.size(); i++)
     {
-        if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+        if (boundaryConditions_[i] == 1) // quando =1 é porque o deslocamento naquela direção está sendo
         {
             for (int k = 0; k < 3 * nodes_.size(); k++)
             {
@@ -387,7 +387,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
     int auxiliar = int(3 * nodes_.size() / 20) + 2;
     vector<double> vecAuxiliar(auxiliar, 1000.0);
     vecAuxiliar(0) = -1000.0;
-    //matrix<double> defmodo(auxiliar - 1, 3 * nodes_.size());
+    // matrix<double> defmodo(auxiliar - 1, 3 * nodes_.size());
 
     for (int i = 0; i < (auxiliar - 1); i++)
     {
@@ -432,7 +432,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
         file2 << "w" << i << " = " << vecAuxiliar(i + 1) << " rad/(ms)" << std::endl;
     }
 
-    const double deltat = 2.0 * 3.1415926535 / (10.0 * vecAuxiliar(auxiliar - 1)); //ntp=10
+    const double deltat = 2.0 * 3.1415926535 / (10.0 * vecAuxiliar(auxiliar - 1)); // ntp=10
     file2 << std::endl;
     file2 << "deltat = " << deltat << " ms" << std::endl;
 
@@ -443,7 +443,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
     for (int i = 0; i < 3 * nodes_.size(); i++)
     {
-        if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+        if (boundaryConditions_[i] == 1) // quando =1 é porque o deslocamento naquela direção está sendo
         {
             for (int k = 0; k < 3 * nodes_.size(); k++)
             {
@@ -484,18 +484,18 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
         std::cout << "------------------------- TIME STEP = "
                   << timeStep << " -------------------------\n";
 
-        for (int interation = 0; interation < 20; interation++) //definir o máximo de interações por passo de carga
+        for (int interation = 0; interation < 20; interation++) // definir o máximo de interações por passo de carga
         {
             vector<int> c(3 * nodes_.size(), 0);
             vector<double> g(3 * nodes_.size(), 0.0), deltaY(3 * nodes_.size(), 0.0);
 
             g = InternalForces() + InertialForces(beta, gamma, deltat) - dexternalForces;
-            //amortemciento
+            // amortemciento
             matrix<double, column_major> hessian = Hessian() + MassMatrix() / (beta * deltat * deltat) + 0.05 * MassMatrix() * gamma / (beta * deltat);
 
             for (int i = 0; i < 3 * nodes_.size(); i++)
             {
-                if (boundaryConditions_[i] == 1) //quando =1 é porque o deslocamento naquela direção está sendo
+                if (boundaryConditions_[i] == 1) // quando =1 é porque o deslocamento naquela direção está sendo
                 {
                     for (int k = 0; k < 3 * nodes_.size(); k++)
                     {
@@ -513,7 +513,7 @@ int Truss::solveDynamicProblem(const int &numberOfTimes, const double &tolerance
 
             double normDeltaY = 0.0;
 
-            for (int h = 0; h < nodes_.size(); h++) //loop para atualizar as coordenadas dos nós
+            for (int h = 0; h < nodes_.size(); h++) // loop para atualizar as coordenadas dos nós
             {
                 int index = nodes_[h]->getIndex();
                 std::vector<double> currentCoordinate = nodes_[h]->getCurrentCoordinate();
@@ -575,7 +575,7 @@ void Truss::exportToParaview(const int &loadstep)
     text << name_ << loadstep << ".vtu";
     std::ofstream file(text.str());
 
-    //header
+    // header
     file << "<?xml version=\"1.0\"?>"
          << "\n"
          << "<VTKFile type=\"UnstructuredGrid\">"
@@ -586,7 +586,7 @@ void Truss::exportToParaview(const int &loadstep)
          << "\"  NumberOfCells=\"" << elements_.size()
          << "\">"
          << "\n";
-    //nodal coordinates
+    // nodal coordinates
     file << "    <Points>"
          << "\n"
          << "      <DataArray type=\"Float64\" "
@@ -602,7 +602,7 @@ void Truss::exportToParaview(const int &loadstep)
          << "\n"
          << "    </Points>"
          << "\n";
-    //element connectivity
+    // element connectivity
     file << "    <Cells>"
          << "\n"
          << "      <DataArray type=\"Int32\" "
@@ -617,7 +617,7 @@ void Truss::exportToParaview(const int &loadstep)
 
     file << "      </DataArray>"
          << "\n";
-    //offsets
+    // offsets
     file << "      <DataArray type=\"Int32\""
          << " Name=\"offsets\" format=\"ascii\">"
          << "\n";
@@ -632,7 +632,7 @@ void Truss::exportToParaview(const int &loadstep)
 
     file << "      </DataArray>"
          << "\n";
-    //elements type
+    // elements type
     file << "      <DataArray type=\"UInt8\" Name=\"types\" "
          << "format=\"ascii\">"
          << "\n";
@@ -646,7 +646,7 @@ void Truss::exportToParaview(const int &loadstep)
          << "\n"
          << "    </Cells>"
          << "\n";
-    //nodal results
+    // nodal results
     file << "    <PointData>"
          << "\n";
     file << "      <DataArray type=\"Float64\" NumberOfComponents=\"3\" "
@@ -684,13 +684,13 @@ void Truss::exportToParaview(const int &loadstep)
          << "\n";
     file << "    </PointData>"
          << "\n";
-    //elemental results
+    // elemental results
     file << "    <CellData>"
          << "\n";
 
     file << "    </CellData>"
          << "\n";
-    //footnote
+    // footnote
     file << "  </Piece>"
          << "\n"
          << "  </UnstructuredGrid>"

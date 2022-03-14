@@ -76,8 +76,8 @@ double Element::PiolaStress()
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
     double s;
 
-    //s = (getMaterial()->getYoung())*(green/(2*green+1));
-    //s = (getMaterial()->getYoung())*(sqrt(2*green+1)-1);
+    // s = (getMaterial()->getYoung())*(green/(2*green+1));
+    // s = (getMaterial()->getYoung())*(sqrt(2*green+1)-1);
 
     if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain() * -1.0)
     {
@@ -119,7 +119,7 @@ std::vector<double> Element::TemperatureForce(const int &numberOfSteps, const in
     std::vector<double> initialNode = connection_[0]->getCurrentCoordinate();
     std::vector<double> endNode = connection_[1]->getCurrentCoordinate();
     std::vector<double> forceConec_;
-    double young= getMaterial()->getYoung();
+    double young = getMaterial()->getYoung();
     // double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
     // if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
@@ -151,18 +151,18 @@ bounded_matrix<double, 6, 6> Element::localHessian()
     double young;
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
-    //young = (getMaterial()->getYoung())/sqrt(2*green+1);
+    // young = (getMaterial()->getYoung())/sqrt(2*green+1);
 
-    //young = (getMaterial()->getYoung())/pow(2*green+1,2);
+    // young = (getMaterial()->getYoung())/pow(2*green+1,2);
 
-    //young = (getMaterial()->getYoung())*(1/())
+    // young = (getMaterial()->getYoung())*(1/())
 
-    if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
+    if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain() * -1.0)
     {
         young = getMaterial()->getYoung();
     }
 
-    if (green > getMaterial()->getPlastStrain() || green < getMaterial()->getPlastStrain()*-1.0)
+    if (green > getMaterial()->getPlastStrain() || green < getMaterial()->getPlastStrain() * -1.0)
     {
         young = getMaterial()->getHardeningModulus();
     }
@@ -208,7 +208,7 @@ bounded_matrix<double, 6, 6> Element::localHessian()
 
 bounded_matrix<double, 6, 6> Element::localTemperatureHessian(const int &numberOfSteps, const int &currentStep)
 {
-    double young= getMaterial()->getYoung();
+    double young = getMaterial()->getYoung();
     double green = 0.5 * ((CurrentLength() * CurrentLength() - InitialLength() * InitialLength()) / (InitialLength() * InitialLength()));
 
     // if (green <= getMaterial()->getPlastStrain() && green >= getMaterial()->getPlastStrain()*-1.0)
